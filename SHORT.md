@@ -124,3 +124,70 @@ Twitter Bot 是什么？说白了就是 Twitter 上的机器人水军。对照�
 4. 根据第一步中的最后总结，想象一下针对 NN 的 SGD 应该怎么做？（框架的优化器）
 
 
+### 阶段三：快速找到这个函数
+
+#### 第一步：慢在哪里？
+
+1. [计算慢](https://www.analyticsvidhya.com/blog/2017/05/gpus-necessary-for-deep-learning/) -> **Computation Bounded**
+2. [读数据慢](https://www.cnblogs.com/yinghuali/p/7611921.html) -> **IO Bounded**
+3. [收敛慢](https://medium.com/south-park-commons/otodscinos-the-root-cause-of-slow-neural-net-training-fec7295c364c) **工程上无法解决，了解一下就好**
+
+#### 第二步：怎么提高计算速度？
+
+生物上，我们讲究 **形态与功能相适应**，在这里我们讲究计算特性和计算方式相适应。
+
+1. CPU -> [MKL](https://en.wikipedia.org/wiki/Math_Kernel_Library)、[MKL-DNN](https://github.com/intel/mkl-dnn)
+2. GPU -> 为什么 GPU 能提升速度？[GPU 这种 SIMT-based SIMD](https://www.archive.ece.cmu.edu/~ece740/f13/lib/exe/fetch.php?media=seth-740-fall13-module5.1-simd-vector-gpu.pdf) 符合 [计算特性](https://en.wikipedia.org/wiki/Matrix_multiplication)
+3. 各种并行化 -> [数据并行化/模型并行化](https://medium.com/@esaliya/model-parallelism-in-deep-learning-is-not-what-you-think-94d2f81e82ed)
+4. 配套设备 -> 网络（同步参数、读取数据）、磁盘（读取数据）、[PCI-E/RDMA](https://devblogs.nvidia.com/introduction-cuda-aware-mpi/) 
+6. 更好的求解方法 **跟工程无关，了解一下就好**
+
+### 阶段四：用这个函数
+
+#### 训练出来的模型怎么用？
+
+1. 第一：预处理数据
+2. 第二：将处理后的数据作为模型输入执行 feed-forward
+3. 第三：后处理数据
+
+#### 在哪里用决定了使用的工具
+
+1. 云端
+ - 硬件：CPU/GPU/[FPGA](https://zh.wikipedia.org/zh-hans/%E7%8E%B0%E5%9C%BA%E5%8F%AF%E7%BC%96%E7%A8%8B%E9%80%BB%E8%BE%91%E9%97%A8%E9%98%B5%E5%88%97)
+ - 软件：[TF-Serving](https://www.tensorflow.org/tfx/guide/serving)/[TensorRT](https://developer.nvidia.com/tensorrt)/[VINO](https://software.intel.com/en-us/openvino-toolkit)/GraphPipe
+
+2. 终端
+ - iOS: [CoreML](https://developer.apple.com/documentation/coreml)
+ - Android: [TF Lite](https://www.tensorflow.org/lite)
+ - Web: [TensorFlow.js](https://www.tensorflow.org/js)
+
+
+### 阶段五：Clever - AI IDE
+
+我们假设一个用户场景：根据图片判断是收据还是车票
+
+#### 第零步：准备数据
+1. 上传数据
+2. 数据预处理
+
+#### 第一步：训练模型
+1. Debug 训练代码：Jupyter
+2. 正式训练：单机/分布式任务
+
+#### 第二步：评估对比
+- 模型训练出来了，能直接上线吗？（Overfitting，Training/Validation/Test dataset，Error-in/Error-out）我们有模型评估功能
+- 新的模型一定比旧的模型好吗？评判的标准是什么？我们有模型对比功能
+
+#### 第三步：模型服务
+1. 创建一个场景。什么是场景？
+2. 添加模型、平滑升级
+3. HPA
+4. AB 测试
+
+#### 第四步：AI 流水线
+
+这么多步骤，每次都手动是不是很麻烦？当然很麻烦，所以我们有装 AI 流水线
+
+#### 运维：资源分配
+
+除了算法工程师，我们还为平台管理员提供了分配资源的功能
